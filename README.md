@@ -8,9 +8,7 @@ A swapping word plugin I made for neovim
 return {
   "indyleo/sword-nvim",
   lazy = false,
-  config = function()
-    require("sword").setup()
-  end,
+  config = true,
 }
 ```
 
