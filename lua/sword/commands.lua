@@ -13,7 +13,7 @@ local function setup_commands()
   end, { desc = "Cycle replacement backward" })
 
   mkcmd("SwapAdd", function(args)
-    sword.add_swap_group(args)
+    sword.add_swap_group(args.fargs)
   end, {
     nargs = "+",
     desc = "Add a new word swap group and save it",
