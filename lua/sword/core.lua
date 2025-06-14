@@ -9,7 +9,7 @@ local replacement_groups = groups.get()
 function M.replace(reverse)
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
   local line = vim.api.nvim_get_current_line()
-  local word = vim.fn.expand "<cword>"
+  local word = vim.fn.expand "<cWORD>"
 
   -- Try toggle sign
   local toggled = signs.toggle_sign(word)
