@@ -3,6 +3,7 @@ local M = {}
 
 local groups = require "sword.groups"
 local signs = require "sword.signs"
+local casing = require "sword.casing"
 
 local replacement_groups = groups.get()
 
@@ -36,7 +37,8 @@ function M.replace(reverse)
 
   if found_group then
     local next_idx = reverse and ((found_idx - 2) % #found_group + 1) or (found_idx % #found_group + 1)
-    local replacement = found_group[next_idx]
+    local replacement_raw = found_group[next_idx]
+    local replacement = casing.match_case(word, replacement_raw)
     local new_line = line:gsub(vim.pesc(word), replacement, 1)
     vim.api.nvim_set_current_line(new_line)
   else
