@@ -1,3 +1,4 @@
+-- lua/sword/casing.lua
 local M = {}
 
 function M.match_case(original, replacement)

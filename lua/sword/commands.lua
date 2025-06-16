@@ -1,5 +1,6 @@
 -- lua/sword/commands.lua
 local sword = require "sword.core"
+local tests = require "sword.test"
 local mkcmd = vim.api.nvim_create_user_command
 
 local function setup_commands()
@@ -33,6 +34,18 @@ local function setup_commands()
   mkcmd("SwapReload", function()
     sword.reload_swap_groups()
   end, { desc = "Reload swap groups from swaps.lua" })
+
+  mkcmd("SwapCNext", function()
+    sword.case_cycle(false)
+  end, { desc = "Cycle case replacement forward" })
+
+  mkcmd("SwapCPrev", function()
+    sword.case_cycle(true)
+  end, { desc = "Cycle case replacement backward" })
+
+  mkcmd("SwapCTest", function()
+    tests.case_test()
+  end, { desc = "DEVELOPMENT: Run case tests" })
 end
 
 return {

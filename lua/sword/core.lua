@@ -4,6 +4,7 @@ local M = {}
 local groups = require "sword.groups"
 local signs = require "sword.signs"
 local casing = require "sword.casing"
+local case = require "sword.case"
 
 local replacement_groups = groups.get()
 
@@ -84,6 +85,18 @@ end
 function M.reload_swap_groups()
   replacement_groups = groups.reload()
   print "Reloaded swap groups from file"
+end
+
+function M.case_cycle(reverse)
+  local word = vim.fn.expand "<cword>"
+  local filetype = vim.bo.filetype
+  if reverse == nil then
+    reverse = false -- default forward (not reversed)
+  end
+  local swapped = case.cycle_case(word, filetype, reverse)
+  if word ~= swapped then
+    vim.cmd("normal! ciw" .. swapped)
+  end
 end
 
 return M
