@@ -34,3 +34,9 @@ Add this snippet to your LazyVim plugin spec (ideally in its own file for better
 
 - `:SwapRm`
   Remove a swap based off its index from `:SwapList`
+
+# Future Plans
+
+- Add a configuration for word list and cases to add on your own
+
+- Some sort of ranking/priority for swaps so doesn't have to be linear
