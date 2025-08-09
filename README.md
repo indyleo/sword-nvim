@@ -21,7 +21,7 @@ Add this snippet to your LazyVim plugin spec (ideally in its own file for better
   example:
 
   - on <-> off
-  - off <-> on
+  - false <-> true
 
 - `:SwapReload`
   Reloads the active swaps
