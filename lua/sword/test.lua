@@ -99,6 +99,49 @@ function M.swap_test()
   end
 end
 
+--------------------------------------------------------------------
+-- 🔥 PERFORMANCE BENCHMARKS
+--------------------------------------------------------------------
+function M.benchmark(iterations)
+  iterations = iterations or 10000
+  print(("\n==== BENCHMARK (%d iterations) ===="):format(iterations))
+
+  local start_time = vim.loop.hrtime()
+
+  local words = {
+    "true",
+    "false",
+    "MyVariable",
+    "my_variable",
+    "HTTPRequest",
+    "snake_case",
+    "kebab-case",
+    "SCREAM_CASE",
+    "file_v2",
+    "off",
+  }
+
+  local langs = { "lua", "python", "javascript", "rust", "default" }
+
+  -- benchmark case cycling
+  for i = 1, iterations do
+    local word = words[(i % #words) + 1]
+    local lang = langs[(i % #langs) + 1]
+    case.cycle_case(word, lang, false)
+  end
+
+  -- benchmark replacement toggles
+  local signs = require "sword.signs"
+  for i = 1, iterations do
+    local word = words[(i % #words) + 1]
+    signs.toggle_sign(word)
+  end
+
+  local elapsed = (vim.loop.hrtime() - start_time) / 1e6 -- ms
+  local per_op = elapsed / (iterations * 2)
+  print(("✅ Done in %.2f ms (%.4f ms per op)\n"):format(elapsed, per_op))
+end
+
 function M.all()
   M.case_test()
   M.swap_test()
