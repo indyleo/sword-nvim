@@ -1,3 +1,4 @@
+-- lua/sword/test.lua
 local M = {}
 
 local case = require "sword.case"
