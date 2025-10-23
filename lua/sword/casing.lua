@@ -2,15 +2,15 @@
 local M = {}
 
 function M.match_case(original, replacement)
+  local base = replacement
   if original:match "^%u+$" then
-    return replacement:upper()
+    base = base:upper()
   elseif original:match "^%l+$" then
-    return replacement:lower()
+    base = base:lower()
   elseif original:match "^%u%l+$" then
-    return replacement:sub(1, 1):upper() .. replacement:sub(2):lower()
-  else
-    return replacement
+    base = base:sub(1, 1):upper() .. base:sub(2):lower()
   end
+  return base
 end
 
 return M

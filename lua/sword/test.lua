@@ -2,8 +2,12 @@
 local M = {}
 
 local case = require "sword.case"
+local casing = require "sword.casing"
+local signs = require "sword.signs"
+local groups = require "sword.groups"
 
-local tests = {
+-- ✅ case cycling tests
+local case_tests = {
   "myvariable",
   "myVariable",
   "MyVariable",
@@ -11,19 +15,93 @@ local tests = {
   "MY_VARIABLE",
   "my-variable",
   "MY-VARIABLE",
+  "MyXMLParser",
+  "HTTPRequest",
+  "id2Name",
+  "userID",
+  "file_v2",
+  "count",
 }
 
-local lang = "default"
+-- ✅ punctuation + edge replacement tests
+local swap_tests = {
+  "true",
+  "True",
+  "FALSE",
+  "false,",
+  "(False)",
+  "yes;",
+  "off)",
+  "-3.14",
+  "0xFF",
+  "++",
+  "--",
+  "north",
+  "west",
+}
 
+-- helper to print section headers
+local function section(title)
+  print(("\n==== %s ===="):format(title))
+end
+
+-- test 1: case cycling
 function M.case_test()
-  for _, word in ipairs(tests) do
-    print("Original: ", word)
+  section "CASE CYCLING"
+  local lang = "default"
+
+  for _, word in ipairs(case_tests) do
+    print("→ Original:", word)
+    local seen = {}
     for i = 1, 8 do
       word = case.cycle_case(word, lang, false)
-      print("  forward: ", word)
+      if seen[word] then
+        break
+      end -- stop infinite loops
+      seen[word] = true
+      print(("   [%d] %s"):format(i, word))
     end
-    print "---"
   end
+end
+
+-- test 2: replacement groups
+function M.swap_test()
+  section "REPLACEMENT / SIGN TOGGLE"
+  local replacement_groups = groups.get()
+
+  for _, word in ipairs(swap_tests) do
+    local toggled = signs.toggle_sign(word)
+    if toggled then
+      print(("→ Sign toggle: %s → %s"):format(word, toggled))
+    else
+      local found_group, found_idx
+      for _, group in ipairs(replacement_groups) do
+        for idx, token in ipairs(group) do
+          if token:lower() == word:lower():gsub("%p", "") then
+            found_group = group
+            found_idx = idx
+            break
+          end
+        end
+        if found_group then
+          break
+        end
+      end
+      if found_group then
+        local next_idx = (found_idx % #found_group) + 1
+        local replacement_raw = found_group[next_idx]
+        local replacement = casing.match_case(word, replacement_raw)
+        print(("→ Swap: %s → %s"):format(word, replacement))
+      else
+        print(("→ No group match: %s"):format(word))
+      end
+    end
+  end
+end
+
+function M.all()
+  M.case_test()
+  M.swap_test()
 end
 
 return M

@@ -8,10 +8,41 @@ local case = require "sword.case"
 
 local replacement_groups = groups.get()
 
+-- 💬 show a small floating message near the cursor
+local function show_popup(msg)
+  local buf = vim.api.nvim_create_buf(false, true)
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, { msg })
+
+  -- compute popup width and height
+  local width = vim.fn.strdisplaywidth(msg) + 2
+  local height = 1
+
+  local opts = {
+    relative = "cursor",
+    row = 1,
+    col = 1,
+    width = width,
+    height = height,
+    style = "minimal",
+    border = "rounded",
+    noautocmd = true,
+  }
+
+  local win = vim.api.nvim_open_win(buf, false, opts)
+  vim.api.nvim_set_option_value("winhl", "Normal:MoreMsg", { win = win })
+
+  -- auto close after ~1 second
+  vim.defer_fn(function()
+    if vim.api.nvim_win_is_valid(win) then
+      vim.api.nvim_win_close(win, true)
+    end
+  end, 1000)
+end
+
 function M.replace(reverse)
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
   local line = vim.api.nvim_get_current_line()
-  local word = vim.fn.expand "<cWORD>"
+  local word = vim.fn.expand "<cword>"
 
   -- Try toggle sign
   local toggled = signs.toggle_sign(word)
@@ -36,15 +67,35 @@ function M.replace(reverse)
     end
   end
 
-  if found_group then
-    local next_idx = reverse and ((found_idx - 2) % #found_group + 1) or (found_idx % #found_group + 1)
-    local replacement_raw = found_group[next_idx]
-    local replacement = casing.match_case(word, replacement_raw)
-    local new_line = line:gsub(vim.pesc(word), replacement, 1)
-    vim.api.nvim_set_current_line(new_line)
-  else
+  if not found_group then
     print("No replacement found for: " .. word)
+    return
   end
+
+  local next_idx = reverse and ((found_idx - 2) % #found_group + 1) or (found_idx % #found_group + 1)
+
+  local replacement_raw = found_group[next_idx]
+  local replacement = casing.match_case(word, replacement_raw)
+
+  -- Match boundaries: capture any punctuation around
+  local pattern = "([%w_]+)"
+  local new_line, count = line:gsub(pattern, function(match)
+    if match:lower() == word:lower() then
+      return replacement
+    end
+    return match
+  end, 1)
+
+  if count == 0 then
+    -- fallback with punctuation-aware pattern
+    local alt_pat = "([^%w_])" .. vim.pesc(word) .. "([^%w_])"
+    new_line = line:gsub(alt_pat, function(before, after)
+      return before .. replacement .. after
+    end, 1)
+  end
+
+  vim.api.nvim_set_current_line(new_line)
+  show_popup("Swapped → " .. replacement)
 end
 
 function M.add_swap_group(args)
@@ -96,6 +147,7 @@ function M.case_cycle(reverse)
   local swapped = case.cycle_case(word, filetype, reverse)
   if word ~= swapped then
     vim.cmd("normal! ciw" .. swapped)
+    show_popup("Case → " .. swapped)
   end
 end
 

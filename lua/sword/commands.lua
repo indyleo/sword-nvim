@@ -42,10 +42,6 @@ local function setup_commands()
   mkcmd("SwapCPrev", function()
     sword.case_cycle(true)
   end, { desc = "Cycle case replacement backward" })
-
-  mkcmd("SwapCTest", function()
-    tests.case_test()
-  end, { desc = "DEVELOPMENT: Run case tests" })
 end
 
 return {
