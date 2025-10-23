@@ -9,7 +9,7 @@ local case = require "sword.case"
 local replacement_groups = groups.get()
 
 -- 💬 show a small floating message near the cursor
-local function show_popup(msg)
+function M.show_popup(msg)
   local buf = vim.api.nvim_create_buf(false, true)
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, { msg })
 

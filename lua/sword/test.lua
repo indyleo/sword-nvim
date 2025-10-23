@@ -139,7 +139,13 @@ function M.benchmark(iterations)
 
   local elapsed = (vim.loop.hrtime() - start_time) / 1e6 -- ms
   local per_op = elapsed / (iterations * 2)
-  print(("✅ Done in %.2f ms (%.4f ms per op)\n"):format(elapsed, per_op))
+  local msg = ("Sword benchmark: %.1f ms total (%.4f ms/op)"):format(elapsed, per_op)
+  local ok, core = pcall(require, "sword.core")
+  if ok and core.show_popup then
+    core.show_popup(msg)
+  else
+    print(msg)
+  end
 end
 
 function M.all()
