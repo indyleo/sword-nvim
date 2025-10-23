@@ -95,7 +95,7 @@ function M.replace(reverse)
   end
 
   vim.api.nvim_set_current_line(new_line)
-  show_popup("Swapped → " .. replacement)
+  M.show_popup("Swapped → " .. replacement)
 end
 
 function M.add_swap_group(args)
@@ -147,7 +147,7 @@ function M.case_cycle(reverse)
   local swapped = case.cycle_case(word, filetype, reverse)
   if word ~= swapped then
     vim.cmd("normal! ciw" .. swapped)
-    show_popup("Case → " .. swapped)
+    M.show_popup("Case → " .. swapped)
   end
 end
 
