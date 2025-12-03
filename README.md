@@ -127,32 +127,16 @@ press <leader>sc  →  "SomeVariableName"
 
 ## 🎮 Commands
 
-### Word Swapping
-
-| Command                      | Description                            |
-| ---------------------------- | -------------------------------------- |
-| `:SwapNext`                  | Cycle word forward through swap group  |
-| `:SwapPrev`                  | Cycle word backward through swap group |
-| `:SwapAdd word1 word2 word3` | Add a new swap group                   |
-| `:SwapRm <index>`            | Remove swap group by index             |
-| `:SwapList`                  | List all active swap groups            |
-| `:SwapReload`                | Reload swap groups from file           |
-
-### Case Cycling
-
-| Command      | Description               |
-| ------------ | ------------------------- |
-| `:SwapCNext` | Cycle case style forward  |
-| `:SwapCPrev` | Cycle case style backward |
-
-### Testing
-
-| Command                       | Description                |
-| ----------------------------- | -------------------------- |
-| `:SwapTest`                   | Run all tests              |
-| `:SwapTestCase`               | Run case cycling tests     |
-| `:SwapTestSwap`               | Run swap/replacement tests |
-| `:SwapBenchmark [iterations]` | Run performance benchmark  |
+| Command                       | Description                            |
+| ----------------------------- | -------------------------------------- |
+| `:SwapNext`                   | Cycle word forward through swap group  |
+| `:SwapPrev`                   | Cycle word backward through swap group |
+| `:SwapCNext`                  | Cycle case style forward               |
+| `:SwapCPrev`                  | Cycle case style backward              |
+| `:SwapTest`                   | Run all tests                          |
+| `:SwapTestCase`               | Run case cycling tests                 |
+| `:SwapTestSwap`               | Run swap/replacement tests             |
+| `:SwapBenchmark [iterations]` | Run performance benchmark              |
 
 ## 📝 Configuration
 
@@ -214,25 +198,23 @@ The plugin comes with these default swap groups:
 
 ### Managing Swap Groups
 
-```vim
-" Add a new swap group
-:SwapAdd foo bar baz
+All swap groups are managed through your configuration file:
 
-" List all groups with their indices
-:SwapList
-" Output:
-" 1: monday, tuesday, wednesday, thursday, friday, saturday, sunday
-" 2: true, false
-" 3: foo, bar, baz
+```lua
+require('sword').setup({
+  -- Use default groups (true) or only your custom groups (false)
+  default_groups = true,
 
-" Remove a group by index
-:SwapRm 3
-
-" Reload from saved file
-:SwapReload
+  -- Add your custom swap groups
+  custom_groups = {
+    { "foo", "bar", "baz" },
+    { "api", "service", "controller" },
+    { "development", "staging", "production" },
+  },
+})
 ```
 
-Swap groups are automatically saved to `~/.local/share/nvim/sword_swaps.lua` and persist across sessions.
+This approach keeps all your swap groups in version control and makes them easy to maintain.
 
 ## 🎨 Supported Case Styles
 
@@ -327,15 +309,18 @@ Check if mappings are enabled:
 require('sword').setup({ mappings = true })
 ```
 
-### Custom groups not persisting
+### Swap groups not working
 
-Custom groups added via `:SwapAdd` are saved to:
+Make sure you've added your custom groups to the config:
 
+```lua
+require('sword').setup({
+  default_groups = true,  -- Include built-in groups
+  custom_groups = {
+    { "your", "custom", "groups" },
+  },
+})
 ```
-~/.local/share/nvim/sword_swaps.lua
-```
-
-Check file permissions and ensure the directory exists.
 
 ### Case cycling not working as expected
 

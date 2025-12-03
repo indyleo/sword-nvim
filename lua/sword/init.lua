@@ -36,27 +36,22 @@ function M.setup(opts)
   if M.config.mappings then
     -- Shorten function name
     local keymap = vim.keymap.set
-
     -- Keymap options helper
     local function opts(desc)
       return { noremap = true, silent = true, desc = desc }
     end
-
     -- Helper for multiple modes
     local function map(modes, lhs, rhs, desc)
       keymap(modes, lhs, rhs, opts(desc))
     end
-
     -- Normal mode mappings
     map("n", "<leader>sw", ":SwapNext<CR>", "Sword: Cycle word forward")
     map("n", "<leader>sW", ":SwapPrev<CR>", "Sword: Cycle word backward")
     map("n", "<leader>sc", ":SwapCNext<CR>", "Sword: Cycle case forward")
     map("n", "<leader>sC", ":SwapCPrev<CR>", "Sword: Cycle case backward")
-
     -- Visual mode mappings
     map("x", "<leader>sc", "<cmd>SwapCNext<CR>", "Sword: Cycle case forward (visual)")
     map("x", "<leader>sC", "<cmd>SwapCPrev<CR>", "Sword: Cycle case backward (visual)")
-
     -- Repeat support with dot
     map("n", ".", function()
       -- Check if last command was a sword operation

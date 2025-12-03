@@ -13,36 +13,6 @@ local function setup_commands()
     sword.replace(true)
   end, { desc = "Cycle replacement backward" })
 
-  mkcmd("SwapAdd", function(args)
-    sword.add_swap_group(args.fargs)
-  end, {
-    nargs = "+",
-    desc = "Add a new word swap group and save it",
-  })
-
-  mkcmd("SwapRm", function(opts)
-    sword.remove_swap_group(opts.args)
-  end, {
-    nargs = 1,
-    desc = "Remove a swap group by index",
-  })
-
-  mkcmd("SwapList", function()
-    sword.list_swap_groups()
-  end, { desc = "List active swap groups" })
-
-  mkcmd("SwapReload", function()
-    sword.reload_swap_groups()
-  end, { desc = "Reload swap groups from swaps.lua" })
-
-  mkcmd("SwapCNext", function(opts)
-    sword.case_cycle(false, opts.range > 0)
-  end, { range = true, desc = "Cycle case replacement forward" })
-
-  mkcmd("SwapCPrev", function(opts)
-    sword.case_cycle(true, opts.range > 0)
-  end, { range = true, desc = "Cycle case replacement backward" })
-
   -- Test commands
   mkcmd("SwapTest", function()
     tests.all()
@@ -63,6 +33,14 @@ local function setup_commands()
     nargs = "?",
     desc = "Run performance benchmark (optional: iterations)",
   })
+
+  mkcmd("SwapCNext", function(opts)
+    sword.case_cycle(false, opts.range > 0)
+  end, { range = true, desc = "Cycle case replacement forward" })
+
+  mkcmd("SwapCPrev", function(opts)
+    sword.case_cycle(true, opts.range > 0)
+  end, { range = true, desc = "Cycle case replacement backward" })
 end
 
 return {

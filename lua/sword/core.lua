@@ -127,51 +127,16 @@ function M.replace(reverse)
   M.show_popup("Swapped → " .. replacement)
 end
 
-function M.add_swap_group(args)
-  if #args < 2 then
-    print "Need at least two words to form a swap group"
-    return
-  end
-
-  table.insert(replacement_groups, args)
-  local ok, err = groups.save()
-  if ok then
-    print "Added swap group and saved"
-  else
-    print("Failed to save swap groups: " .. (err or "unknown error"))
-  end
-end
-
-function M.remove_swap_group(index_str)
-  local idx = tonumber(index_str)
-  if not idx or idx < 1 or idx > #replacement_groups then
-    print("Invalid index: " .. tostring(index_str))
-    return
-  end
-
-  table.remove(replacement_groups, idx)
-  local ok, err = groups.save()
-  if ok then
-    print "Removed swap group and saved"
-  else
-    print("Failed to save swap groups: " .. (err or "unknown error"))
-  end
-end
-
 function M.list_swap_groups()
   if #replacement_groups == 0 then
     print "No swap groups configured"
     return
   end
 
+  print "Active swap groups:"
   for i, group in ipairs(replacement_groups) do
     print(string.format("%d: %s", i, table.concat(group, ", ")))
   end
-end
-
-function M.reload_swap_groups()
-  replacement_groups = groups.reload()
-  print "Reloaded swap groups from file"
 end
 
 -- 🎨 Case cycle with visual mode support
