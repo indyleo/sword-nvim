@@ -3,6 +3,7 @@ local M = {}
 
 function M.match_case(original, replacement)
   local base = replacement
+
   if original:match "^%u+$" then
     base = base:upper()
   elseif original:match "^%l+$" then
@@ -10,6 +11,7 @@ function M.match_case(original, replacement)
   elseif original:match "^%u%l+$" then
     base = base:sub(1, 1):upper() .. base:sub(2):lower()
   end
+
   return base
 end
 

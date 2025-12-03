@@ -35,13 +35,34 @@ local function setup_commands()
     sword.reload_swap_groups()
   end, { desc = "Reload swap groups from swaps.lua" })
 
-  mkcmd("SwapCNext", function()
-    sword.case_cycle(false)
-  end, { desc = "Cycle case replacement forward" })
+  mkcmd("SwapCNext", function(opts)
+    sword.case_cycle(false, opts.range > 0)
+  end, { range = true, desc = "Cycle case replacement forward" })
 
-  mkcmd("SwapCPrev", function()
-    sword.case_cycle(true)
-  end, { desc = "Cycle case replacement backward" })
+  mkcmd("SwapCPrev", function(opts)
+    sword.case_cycle(true, opts.range > 0)
+  end, { range = true, desc = "Cycle case replacement backward" })
+
+  -- Test commands
+  mkcmd("SwapTest", function()
+    tests.all()
+  end, { desc = "Run all Sword tests" })
+
+  mkcmd("SwapTestCase", function()
+    tests.case_test()
+  end, { desc = "Run case cycling tests" })
+
+  mkcmd("SwapTestSwap", function()
+    tests.swap_test()
+  end, { desc = "Run swap/replacement tests" })
+
+  mkcmd("SwapBenchmark", function(opts)
+    local iterations = tonumber(opts.args) or 10000
+    tests.benchmark(iterations)
+  end, {
+    nargs = "?",
+    desc = "Run performance benchmark (optional: iterations)",
+  })
 end
 
 return {

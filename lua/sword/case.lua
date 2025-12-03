@@ -1,16 +1,18 @@
 -- lua/sword/case.lua
 local M = {}
 
--- Helper: find index in table
-function vim.tbl_indexof(tbl, val)
-  for i, v in ipairs(tbl) do
-    if v == val then
-      return i
+-- Polyfill for vim.tbl_indexof if not available
+if not vim.tbl_indexof then
+  function vim.tbl_indexof(tbl, val)
+    for i, v in ipairs(tbl) do
+      if v == val then
+        return i
+      end
     end
   end
 end
 
--- 🧠 Smarter word splitter: handles acronyms + camel/Pascal/kebab/snake
+-- 🧠 Improved word splitter: handles acronyms + camel/Pascal/kebab/snake
 function M.split_words(word)
   local parts = {}
 
@@ -23,23 +25,36 @@ function M.split_words(word)
       table.insert(parts, w:lower())
     end
   elseif word:match "^[A-Z0-9_-]+$" then
-    for w in word:gmatch "[A-Z0-9]+" do
-      table.insert(parts, w:lower())
-    end
+    -- Pure uppercase/screaming case - treat as single word
+    table.insert(parts, word:lower())
   elseif word:match "[a-z]" and word:match "[A-Z]" then
-    -- Handle acronyms like "XMLHttpRequest" or "MyXMLParser"
+    -- CamelCase/PascalCase with potential acronyms
     local chunk = ""
     for i = 1, #word do
       local c = word:sub(i, i)
       local nextc = word:sub(i + 1, i + 1)
-      if c:match "%u" and nextc and nextc:match "%l" and #chunk > 1 then
-        table.insert(parts, chunk:lower())
-        chunk = c
-      elseif c:match "%l" and nextc and nextc:match "%u" then
-        chunk = chunk .. c
-        table.insert(parts, chunk:lower())
-        chunk = ""
+      local prevc = word:sub(i - 1, i - 1)
+
+      if c:match "%u" then
+        -- Uppercase letter
+        if nextc and nextc:match "%l" then
+          -- Start of new word (e.g., XMLParser -> "XML" + "Parser")
+          if #chunk > 0 then
+            table.insert(parts, chunk:lower())
+          end
+          chunk = c
+        elseif prevc and prevc:match "%l" then
+          -- Transition from lower to upper (e.g., myVariable)
+          if #chunk > 0 then
+            table.insert(parts, chunk:lower())
+          end
+          chunk = c
+        else
+          -- Consecutive uppercase (acronym like HTTP)
+          chunk = chunk .. c
+        end
       else
+        -- Lowercase letter or number
         chunk = chunk .. c
       end
     end
@@ -47,7 +62,7 @@ function M.split_words(word)
       table.insert(parts, chunk:lower())
     end
   else
-    -- fallback
+    -- Fallback: single word
     table.insert(parts, word:lower())
   end
 
@@ -56,6 +71,10 @@ end
 
 -- 🧩 Convert back into all case formats
 function M.to_cases(parts)
+  if #parts == 0 then
+    return {}
+  end
+
   local function upper_all(tbl)
     local res = {}
     for _, w in ipairs(tbl) do
@@ -117,8 +136,10 @@ function M.cycle_case(word, lang, reverse)
   local preferred = {
     lua = { "snake_case", "camelCase", "PascalCase", "SCREAM_CASE" },
     javascript = { "camelCase", "PascalCase", "snake_case" },
+    typescript = { "camelCase", "PascalCase", "snake_case" },
     python = { "snake_case", "SCREAM_CASE", "camelCase" },
     rust = { "snake_case", "SCREAM_CASE", "camelCase" },
+    go = { "camelCase", "PascalCase", "snake_case" },
     default = { "flatcase", "camelCase", "PascalCase", "snake_case", "SCREAM_CASE", "kebab-case", "COBOL-CASE" },
   }
 

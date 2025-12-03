@@ -31,9 +31,18 @@ function M.get()
   if #groups == 0 then
     local ok, loaded = pcall(dofile, swap_file)
     if ok and type(loaded) == "table" then
-      groups = loaded
+      -- Validate structure
+      local valid = true
+      for i, group in ipairs(loaded) do
+        if type(group) ~= "table" or #group < 2 then
+          vim.notify("Invalid swap group at index " .. i, vim.log.levels.WARN)
+          valid = false
+          break
+        end
+      end
+      groups = valid and loaded or vim.deepcopy(default_groups)
     else
-      groups = default_groups
+      groups = vim.deepcopy(default_groups)
     end
   end
   return groups

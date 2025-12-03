@@ -21,6 +21,8 @@ local case_tests = {
   "userID",
   "file_v2",
   "count",
+  "IOError",
+  "URLParser",
 }
 
 -- ✅ punctuation + edge replacement tests
@@ -49,17 +51,17 @@ end
 function M.case_test()
   section "CASE CYCLING"
   local lang = "default"
-
   for _, word in ipairs(case_tests) do
     print("→ Original:", word)
+    local current = word
     local seen = {}
     for i = 1, 8 do
-      word = case.cycle_case(word, lang, false)
-      if seen[word] then
+      current = case.cycle_case(current, lang, false)
+      if seen[current] then
         break
-      end -- stop infinite loops
-      seen[word] = true
-      print(("   [%d] %s"):format(i, word))
+      end
+      seen[current] = true
+      print(("   [%d] %s"):format(i, current))
     end
   end
 end
@@ -87,6 +89,7 @@ function M.swap_test()
           break
         end
       end
+
       if found_group then
         local next_idx = (found_idx % #found_group) + 1
         local replacement_raw = found_group[next_idx]
@@ -99,9 +102,7 @@ function M.swap_test()
   end
 end
 
---------------------------------------------------------------------
 -- 🔥 PERFORMANCE BENCHMARKS
---------------------------------------------------------------------
 function M.benchmark(iterations)
   iterations = iterations or 10000
   print(("\n==== BENCHMARK (%d iterations) ===="):format(iterations))
@@ -131,7 +132,6 @@ function M.benchmark(iterations)
   end
 
   -- benchmark replacement toggles
-  local signs = require "sword.signs"
   for i = 1, iterations do
     local word = words[(i % #words) + 1]
     signs.toggle_sign(word)
@@ -139,7 +139,9 @@ function M.benchmark(iterations)
 
   local elapsed = (vim.loop.hrtime() - start_time) / 1e6 -- ms
   local per_op = elapsed / (iterations * 2)
+
   local msg = ("Sword benchmark: %.1f ms total (%.4f ms/op)"):format(elapsed, per_op)
+
   local ok, core = pcall(require, "sword.core")
   if ok and core.show_popup then
     core.show_popup(msg)
