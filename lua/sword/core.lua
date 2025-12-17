@@ -1,12 +1,10 @@
+-- lua/sword/core.lua
 local M = {}
 
 local groups = require "sword.groups"
 local signs = require "sword.signs"
 local casing = require "sword.casing"
 local case = require "sword.case"
-
--- REMOVED: local replacement_groups = groups.get()
--- We now fetch this inside the functions to ensure Custom Groups from setup() are seen.
 
 M.last_operation = nil
 
@@ -38,14 +36,14 @@ local function escape_pattern(text)
   return text:gsub("([^%w])", "%%%1")
 end
 
--- 🔍 Find symbols (Requires groups to be passed in now)
+-- 🔍 Find symbols (Requires groups to be passed in)
 local function get_symbol_at_cursor(line, col, replacement_groups)
   local found_match = nil
   local best_len = 0
 
   for _, group in ipairs(replacement_groups) do
     for idx, token in ipairs(group) do
-      if token:match "[^%w_]" then
+      if token:match "[^%w_]" then -- Only check symbols here
         local escaped = escape_pattern(token)
         local start_search = 1
         while true do
@@ -53,6 +51,7 @@ local function get_symbol_at_cursor(line, col, replacement_groups)
           if not s then
             break
           end
+          -- Check overlap with cursor
           if (col + 1) >= s and (col + 1) <= e then
             if (e - s + 1) > best_len then
               best_len = (e - s + 1)
@@ -95,7 +94,7 @@ function M.replace(reverse)
   local line = vim.api.nvim_get_current_line()
   M.last_operation = { type = "replace", reverse = reverse }
 
-  -- A. Priority: Check Symbols
+  -- A. Priority: Check Symbols (<=, [ ], !=)
   local symbol = get_symbol_at_cursor(line, col, replacement_groups)
   if symbol then
     local next_idx = reverse and ((symbol.idx - 2) % #symbol.group + 1) or (symbol.idx % #symbol.group + 1)
@@ -108,7 +107,7 @@ function M.replace(reverse)
     return
   end
 
-  -- B. Priority: Check Words
+  -- B. Priority: Check Words (foo, true, monday)
   local word, s, e = get_word_at_cursor()
   if word == "" then
     print "No item under cursor"
@@ -150,8 +149,10 @@ function M.change_sign()
   local line = vim.api.nvim_get_current_line()
   M.last_operation = { type = "change_sign" }
 
+  -- A. Check for ++ / -- nearby
   local ops = { "++", "--" }
   for _, op in ipairs(ops) do
+    -- Search in a small window around cursor to catch i++ or ++i
     local s, e = line:find(op, math.max(1, col - 1), true)
     if s and col + 1 >= s and col + 1 <= e then
       local replacement = signs.toggle_sign(op)
@@ -163,10 +164,12 @@ function M.change_sign()
     end
   end
 
+  -- B. Check for Number (including negative)
   local word, s, e = get_word_at_cursor()
   if word ~= "" then
     local full_word = word
     local full_s = s
+    -- Grab preceding minus if it exists
     if s > 1 and line:sub(s - 1, s - 1) == "-" then
       full_word = "-" .. word
       full_s = s - 1
@@ -186,7 +189,7 @@ function M.change_sign()
 end
 
 function M.case_cycle(reverse, is_visual)
-  -- (Logic remains identical to previous version)
+  -- Standard case cycle logic (same as your existing file)
   local filetype = vim.bo.filetype
   if reverse == nil then
     reverse = false
@@ -198,12 +201,6 @@ function M.case_cycle(reverse, is_visual)
     local end_pos = vim.fn.getpos "'>"
     local start_row, start_col = start_pos[2], start_pos[3]
     local end_row, end_col = end_pos[2], end_pos[3]
-
-    if start_row ~= end_row then
-      print "Multi-line selection not supported for case cycling"
-      return
-    end
-
     local line = vim.api.nvim_buf_get_lines(0, start_row - 1, start_row, false)[1]
     local selected = line:sub(start_col, end_col)
     local swapped = case.cycle_case(selected, filetype, reverse)
