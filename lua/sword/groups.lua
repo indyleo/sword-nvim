@@ -1,26 +1,29 @@
--- lua/sword/groups.lua
 local M = {}
 
 local default_groups = {
-  { "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday" },
   { "true", "false" },
-  { "undefined", "null" },
+  { "yes", "no" },
   { "on", "off" },
-  { "always", "never" },
   { "enable", "disable" },
-  { "yes", "no", "maybe" },
   { "up", "down" },
   { "left", "right" },
   { "begin", "end" },
   { "first", "last" },
-  { "north", "east", "south", "west" },
+  { "min", "max" },
+  { "width", "height" },
+  { "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday" },
+  -- Symbol Groups
   { "==", "!=", "~=" },
+  { "===", "!==" },
+  { "<=", ">=" },
   { "<", ">" },
   { "<-", "->" },
-  { "<=", ">=" },
   { "&&", "||" },
   { "+=", "-=" },
-  { "[]", "[X]" },
+  { "*=", "/=" },
+  -- Checkboxes (various styles)
+  { "[]", "[ ]", "[x]", "[X]" },
+  { "- [ ]", "- [x]" },
 }
 
 local groups = {}
